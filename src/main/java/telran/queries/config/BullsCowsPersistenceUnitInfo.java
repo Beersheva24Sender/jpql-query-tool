@@ -51,8 +51,8 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo{
     public DataSource getNonJtaDataSource() {
          HikariDataSource ds = new HikariDataSource();
         ds.setJdbcUrl(String.format("jdbc:postgresql://%s:5432/postgres",
-                System.getenv("POSTGRES_HOST")));
-        ds.setPassword(System.getenv("POSTGRES_PASSWORD"));
+        "3.81.15.155"));
+        ds.setPassword("54321");
         ds.setUsername("postgres");
         ds.setDriverClassName("org.postgresql.Driver");
         return ds;

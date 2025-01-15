@@ -11,8 +11,20 @@ public class Gamer {
     String username;
     LocalDate birthdate;
 
+    public Gamer() {
+    }
+
+    public Gamer(String username2, LocalDate birthdate2) {
+        this.username = username2;
+        this.birthdate = birthdate2;
+    }
+
     @Override
     public String toString() {
         return "Gamer [username=" + username + ", birthdate=" + birthdate + "]";
+    }
+
+    public String getUsername() {
+        return username;
     }
 }
