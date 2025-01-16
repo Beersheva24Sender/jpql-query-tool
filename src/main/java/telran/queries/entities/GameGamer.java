@@ -1,33 +1,43 @@
 package telran.queries.entities;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "game_gamer")
-public class GameGamer {    
-    
+public class GameGamer {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
-
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "game_id")
     Game game;
-
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "gamer_id")
     Gamer gamer;
-
-    @Column (name = "is_winner")
+    @Column(name = "is_winner")
     boolean isWinner;
 
     @Override
     public String toString() {
-        return "GameGamer{" +
-                "id=" + id +
-                ", game=" + game.id +
-                ", gamer=" + gamer.username +
-                ", isWinner=" + isWinner +
-                '}';
+        return "GameGamer [id=" + id + ", game=" + game.id + ", gamer=" + gamer.username + ", isWinner=" + isWinner
+                + "]";
+    }
+
+    public GameGamer() {
+
+    }
+
+    public GameGamer(Game game, Gamer gamer) {
+        this.game = game;
+        this.gamer = gamer;
+    }
+
+    public void setWinnerGame() {
+        isWinner = true;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
 }
