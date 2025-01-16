@@ -1,123 +1,80 @@
 package telran.queries;
 
+import telran.games.repo.*;
+import telran.games.service.*;
+import telran.queries.client.*;
 import telran.queries.config.BullsCowsPersistenceUnitInfo;
-import telran.queries.entities.Game;
-import telran.queries.entities.GameGamer;
-import telran.queries.entities.Gamer;
 import telran.view.*;
-import telran.games.repo.BullCowsRepository;
-import telran.games.repo.BullsCowsRepositoryJpaImpl;
-import telran.games.service.BullsCowsService;
-import telran.games.service.BullsCowsServiceImpl;
-import telran.queries.client.Client;
-import telran.queries.client.ClientImpl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import jakarta.persistence.*;
-import jakarta.persistence.spi.PersistenceUnitInfo;
+
+import java.util.HashMap;
 
 public class Main {
-    static InputOutput io = new StandardInputOutput();
-    static EntityManager em;
-
-    static BullsCowsService bullsCowsService;
-    static ClientImpl client;
+    private static InputOutput io = new StandardInputOutput();
+    private static EntityManager em;
+    private static BullsCowsService service;
+    private static Client client;
 
     public static void main(String[] args) {
         createEntityManager();
 
         BullCowsRepository repository = new BullsCowsRepositoryJpaImpl(em);
-        bullsCowsService = new BullsCowsServiceImpl(repository);
-        client = new ClientImpl(bullsCowsService, io);
+        service = new BullsCowsServiceImpl(repository);
+        client = new ClientImpl(service, io);
 
-        Item[] items = getMainMenuItems();
-        Menu menu = new Menu("Bulls Cows Game", items);
-        menu.perform(io);
-
+        Menu mainMenu = new Menu("Bulls and Cows Game", getMainMenuItems());
+        mainMenu.perform(io);
     }
 
     private static Item[] getMainMenuItems() {
-        return new Item[]{
-            Item.of("Register Gamer", io -> client.createGamer()),
+        return new Item[] {
+            Item.of("Register", io -> client.createGamer()),
             Item.of("Sign In", io -> signInMenu()),
             Item.ofExit()
         };
     }
-    
+
     private static void signInMenu() {
         client.signIn();
-        Menu signInMenu = new Menu("Sign-In Options", getSignInMenuItems());
+        Menu signInMenu = new Menu("Game Options", getSignInMenuItems());
         signInMenu.perform(io);
     }
-    
+
     private static Item[] getSignInMenuItems() {
-        return new Item[]{
-            Item.of("Get Available Games", io -> getAvailableGamesMenu()),
+        return new Item[] {
+            Item.of("View Available Games", io -> viewGamesMenu()),
             Item.ofExit()
         };
     }
 
-    private static void getAvailableGamesMenu() {
+    private static void viewGamesMenu() {
         client.getNotFinishedGamesByUserName();
-        Menu availableGamesMenu = new Menu("Available Games Options", getAvailableGamesMenuItems());
-        availableGamesMenu.perform(io);
+        Menu gamesMenu = new Menu("Available Games Options", getAvailableGamesMenuItems());
+        gamesMenu.perform(io);
     }
-    
+
     private static Item[] getAvailableGamesMenuItems() {
-        return new Item[]{
-            Item.of("Join Game", io -> joinGameMenu()),
-            Item.of("Start Game", io -> client.startGame()),
+        return new Item[] {
+            Item.of("Start a New Game", io -> client.startGame()),
+            Item.of("Join an Existing Game", io -> playGameMenu()),
             Item.ofExit()
         };
     }
 
-
-    private static void joinGameMenu() {
+    private static void playGameMenu() {
         client.joinGame();
-        Menu joinGameMenu = new Menu("Join Game Options", getJoinGameMenuItems());
-        joinGameMenu.perform(io);
-    }
-    
-    private static Item[] getJoinGameMenuItems() {
-        return new Item[]{
-            Item.of("Set Move", io -> client.createMove()),
-            Item.ofExit()
-        };
+        client.playGame();
     }
 
     private static void createEntityManager() {
         HashMap<String, Object> hibernateProperties = new HashMap<>();
         hibernateProperties.put("hibernate.hbm2ddl.auto", "update");
-        PersistenceUnitInfo persistenceUnit = new BullsCowsPersistenceUnitInfo();
-        HibernatePersistenceProvider hibernatePersistenceProvider = new HibernatePersistenceProvider();
-        EntityManagerFactory emf = hibernatePersistenceProvider.createContainerEntityManagerFactory(persistenceUnit,
-                hibernateProperties);
+
+        HibernatePersistenceProvider provider = new HibernatePersistenceProvider();
+        EntityManagerFactory emf = provider.createContainerEntityManagerFactory(new BullsCowsPersistenceUnitInfo(), hibernateProperties);
         em = emf.createEntityManager();
-    }
-
-    static void queryProcessing(InputOutput io) {
-        String queryString = io.readString("Enter JPQL query string");
-        Query query = em.createQuery(queryString);
-        @SuppressWarnings({ "rawtypes" })
-        List result = query.getResultList();
-        if (result.isEmpty()) {
-            io.writeLine("No data");
-        } else {
-            @SuppressWarnings("unchecked")
-            List<String> lines = result.get(0).getClass().isArray() ? getArrayLines(result) : getLines(result);
-            lines.forEach(io::writeLine);
-        }
-    }
-
-    private static List<String> getLines(List<Object> result) {
-        return result.stream().map(Object::toString).toList();
-    }
-
-    private static List<String> getArrayLines(List<Object[]> result) {
-        return result.stream().map(a -> Arrays.deepToString(a)).toList();
     }
 }

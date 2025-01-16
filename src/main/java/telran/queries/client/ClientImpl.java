@@ -1,90 +1,67 @@
 package telran.queries.client;
 
-import telran.view.*;
 import telran.games.service.BullsCowsService;
-import telran.queries.entities.Game;
+import telran.queries.entities.*;
+import telran.view.InputOutput;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class ClientImpl {
+public class ClientImpl implements Client {
+    private final BullsCowsService service;
+    private final InputOutput io;
+    private Gamer loggedInGamer;
 
-    private BullsCowsService bullsCowsService;
-    private InputOutput io;
-
-    public ClientImpl(BullsCowsService bullsCowsService, InputOutput io) {
-        this.bullsCowsService = bullsCowsService;
+    public ClientImpl(BullsCowsService service, InputOutput io) {
+        this.service = service;
         this.io = io;
     }
 
     public void startGame() {
-        long gameId = io.readLong("Enter the game ID to start", "Entered string must be a number otherwise");
-        String username = io.readString("Enter your username");
-
-        try {
-            bullsCowsService.startGame(gameId, username);
-            io.writeLine("Game started successfully. Have fun!");
-        } catch (Exception e) {
-            io.writeLine("Error starting game: " + e.getMessage());
-        }
+        long gameId = io.readLong("Enter game ID to start:", "should be a long");
+        service.startGame(gameId, loggedInGamer);
+        io.writeLine("Game started!");
     }
 
     public void createGamer() {
-        String username = io.readString("Enter username to register");
-        String birthdate = io.readString("Enter your birthdate (YYYY-MM-DD)");
-        try {
-            bullsCowsService.createGamer(username, LocalDate.parse(birthdate, DateTimeFormatter.ISO_LOCAL_DATE));
-            io.writeLine("Gamer registered successfully.");
-        } catch (Exception e) {
-            io.writeLine("Error registering gamer: " + e.getMessage());
-        }
+        String username = io.readString("Enter username:");
+        String birthdate = io.readString("Enter birthdate (YYYY-MM-DD):");
+        service.createGamer(username, LocalDate.parse(birthdate, DateTimeFormatter.ISO_LOCAL_DATE));
+        io.writeLine("Gamer registered.");
     }
 
-    public void signIn(){
-        String username = io.readString("Enter your username");
-        try {
-            bullsCowsService.signIn(username);
-            io.writeLine("Signed in successfully.");
-        } catch (Exception e) {
-            io.writeLine("Error signing in: " + e.getMessage());
-        }
+    public void signIn() {
+        String username = io.readString("Enter username:");
+        loggedInGamer = service.signIn(username);
+        io.writeLine("Signed in successfully as " + username + ".");
     }
 
     public void joinGame() {
-        String username = io.readString("Enter your username");
-        long gameId = io.readLong("Enter game ID to join", "Entered string must be a number otherwise");
-        try {
-            bullsCowsService.joinGame(gameId, username);
-            io.writeLine("Joined game successfully.");
-        } catch (Exception e) {
-            io.writeLine("Error joining game: " + e.getMessage());
+        long gameId = io.readLong("Enter game ID:", "should be a long");
+        service.joinGame(gameId, loggedInGamer);
+        io.writeLine("Joined game.");
+    }
+
+    public void playGame() {
+        while (true) {
+            long gameId = io.readLong("Enter game ID:", "should be a long");
+            String guess = io.readString("Enter your guess sequence:");
+            service.createMove(loggedInGamer, gameId, guess);
+            io.writeLine("Move registered. Guess again or exit.");
         }
     }
 
-    public void createMove() {
-        long gameGamerId = io.readLong("Enter your game gamer ID", "Entered string must be a number otherwise");
-        String sequence = io.readString("Enter the guessed sequence");
-        try {
-            bullsCowsService.createMove(gameGamerId, sequence);
-            io.writeLine("Move set successfully.");
-        } catch (Exception e) {
-            io.writeLine("Error setting move: " + e.getMessage());
-        }
-    }
-
+    @Override
     public void getNotFinishedGamesByUserName() {
-        String username = io.readString("Enter your username to get startable games");
-        try {
-            List<Game> startableGames = bullsCowsService.getNotFinishedGamesByUserName(username);
-            if (startableGames.isEmpty()) {
-                io.writeLine("No startable games found.");
-            } else {
-                io.writeLine("Startable Games:");
-                startableGames.forEach(game -> io.writeLine("Game ID: " + game.getId()));
+        List<Game> games = service.getNotFinishedGamesByGamer(loggedInGamer);
+        if (games.isEmpty()) {
+            io.writeLine("No available games found.");
+        } else {
+            io.writeLine("Available Games:");
+            for (Game game : games) {
+                io.writeLine(String.format("Game ID: %d, Status: %s", game.getId(), game.toString()));
             }
-        } catch (Exception e) {
-            io.writeLine("Error retrieving startable games: " + e.getMessage());
         }
     }
 }

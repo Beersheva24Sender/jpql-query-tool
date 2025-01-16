@@ -1,18 +1,16 @@
 package telran.queries.client;
 
-import telran.view.InputOutput;
-
 public interface Client {
 
-    void startGame(InputOutput io);
+    void startGame();
 
-    void createGamer(InputOutput io);
+    void createGamer();
 
-    void signIn(InputOutput io);
+    void signIn();
 
-    void joinGame(InputOutput io);
+    void joinGame();
 
-    void createMove(InputOutput io);
+    void playGame();
 
-    void getNotFinishedGamesByUserName(InputOutput io);
+    void getNotFinishedGamesByUserName();
 }

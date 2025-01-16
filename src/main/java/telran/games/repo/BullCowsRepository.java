@@ -3,30 +3,21 @@ package telran.games.repo;
 import telran.queries.entities.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
 
 public interface BullCowsRepository {
+    Game startGame(long gameId);
 
-   Game startGame(long gameId, String username);
-   
-   void joinGame(long gameId, String username);
+    void joinGame(long gameId, Gamer gamer);
 
-   void createUser(String username);
+    void createGamer(Gamer gamer);
 
-   void createGame(String sequence);
+    void createMove(GameGamer gameGamer, String sequence);
 
-   void createGamer(String username, LocalDate birthdate);
+    List<Game> getNotFinishedGamesByGamer(Gamer gamer);
 
-   void createMove(long gameGamerId, String sequence);
+    Gamer getGamer(String username);
 
-   List<Game> getNotFinishedGamesByUserName(String username);
-
-   List<Game> getFinishedGamesByUserName(String username);
-
-   void setFinishGame(long id);
-
-   void setWinnerGame(String username, long gameId);
-
-   Gamer getGamer(String username);
+    GameGamer getGameGamerByUserAndGame(String username, long gameId);
 
 }

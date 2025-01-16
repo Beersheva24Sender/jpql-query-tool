@@ -40,4 +40,8 @@ public class GameGamer {
         return game;
     }
 
+    public long getId() {
+        return id;
+    }
+
 }

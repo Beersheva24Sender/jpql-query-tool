@@ -1,11 +1,10 @@
 package telran.games.service;
 
+import telran.games.repo.BullCowsRepository;
+import telran.queries.entities.*;
+
 import java.time.LocalDate;
 import java.util.List;
-
-import telran.games.repo.BullCowsRepository;
-import telran.queries.entities.Game;
-import telran.queries.entities.Gamer;
 
 public class BullsCowsServiceImpl implements BullsCowsService {
     private final BullCowsRepository repository;
@@ -15,59 +14,34 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     }
 
     @Override
-    public Game startGame(long gameId, String username) {
-        return repository.startGame(gameId, username);
+    public Game startGame(long gameId, Gamer gamer) {
+        return repository.startGame(gameId);
     }
 
     @Override
     public void createGamer(String username, LocalDate birthdate) {
-        try {
-            repository.createGamer(username, birthdate);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to register gamer: " + username, e);
-        }
+        Gamer gamer = new Gamer(username, birthdate);
+        repository.createGamer(gamer);
     }
 
     @Override
     public Gamer signIn(String username) {
-        try {
-            Gamer gamer = repository.getGamer(username);
-            if (gamer == null) {
-                throw new RuntimeException("Gamer not found with username: " + username);
-            }
-            return gamer;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to sign in user: " + username, e);
-        }
+        return repository.getGamer(username);
     }
 
     @Override
-    public void joinGame(long gameId, String username) {
-        try {
-            repository.joinGame(gameId, username);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to join game. Check if the game exists and is not started.", e);
-        }
+    public void joinGame(long gameId, Gamer gamer) {
+        repository.joinGame(gameId, gamer);
     }
 
     @Override
-    public void createMove(long gameGamerId, String sequence) {
-        try {
-            repository.createMove(gameGamerId, sequence);
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Move not allowed: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Unexpected error while setting the move.", e);
-        }
+    public void createMove(Gamer gamer, long gameId, String sequence) {
+        GameGamer gameGamer = repository.getGameGamerByUserAndGame(gamer.getUsername(), gameId);
+        repository.createMove(gameGamer, sequence);
     }
 
     @Override
-    public List<Game> getNotFinishedGamesByUserName(String username) {
-        try {
-            return repository.getNotFinishedGamesByUserName(username);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve startable games for user: " + username, e);
-        }
+    public List<Game> getNotFinishedGamesByGamer(Gamer gamer) {
+        return repository.getNotFinishedGamesByGamer(gamer);
     }
-
 }

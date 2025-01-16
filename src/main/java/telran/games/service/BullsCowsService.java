@@ -1,23 +1,22 @@
 package telran.games.service;
 
+import telran.queries.entities.*;
+
 import java.time.LocalDate;
 import java.util.List;
 
-import telran.queries.entities.Game;
-import telran.queries.entities.Gamer;
-
 public interface BullsCowsService {
 
-    Game startGame(long gameId, String username);
+    Game startGame(long gameId, Gamer gamer);
 
     void createGamer(String username, LocalDate birthdate);
 
     Gamer signIn(String username);
 
-    void joinGame(long gameId, String username);
+    void joinGame(long gameId, Gamer gamer);
 
-    void createMove(long gameGamerId, String sequence);
+    void createMove(Gamer gamer, long gameId, String sequence);
 
-    List<Game> getNotFinishedGamesByUserName(String username);
+    List<Game> getNotFinishedGamesByGamer(Gamer gamer);
 
 }
