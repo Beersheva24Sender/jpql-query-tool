@@ -12,18 +12,21 @@ public class ClientImpl implements Client {
     private final BullsCowsService service;
     private final InputOutput io;
     private Gamer loggedInGamer;
+    private Long activeGameId;
 
     public ClientImpl(BullsCowsService service, InputOutput io) {
         this.service = service;
         this.io = io;
     }
 
-    public void startGame() {
-        long gameId = io.readLong("Enter game ID to start:", "should be a long");
-        service.startGame(gameId, loggedInGamer);
-        io.writeLine("Game started!");
+    @Override
+    public void createGame() {
+        service.createGame(loggedInGamer);
+        io.writeLine("Game created!");
+        getNotFinishedGamesByUserName();
     }
 
+    @Override
     public void createGamer() {
         String username = io.readString("Enter username:");
         String birthdate = io.readString("Enter birthdate (YYYY-MM-DD):");
@@ -31,24 +34,38 @@ public class ClientImpl implements Client {
         io.writeLine("Gamer registered.");
     }
 
+    @Override
     public void signIn() {
         String username = io.readString("Enter username:");
         loggedInGamer = service.signIn(username);
         io.writeLine("Signed in successfully as " + username + ".");
     }
 
+    @Override
     public void joinGame() {
-        long gameId = io.readLong("Enter game ID:", "should be a long");
-        service.joinGame(gameId, loggedInGamer);
-        io.writeLine("Joined game.");
+        activeGameId = io.readLong("Enter game ID to join:", "should be a long");
+        service.joinGame(activeGameId, loggedInGamer);
+        io.writeLine("Joined game successfully!");
+        playGame();
     }
 
+    @Override
     public void playGame() {
+        if (activeGameId == null) {
+            io.writeLine("You are not part of any active game. Please join or start a game first.");
+            return;
+        }
+
         while (true) {
-            long gameId = io.readLong("Enter game ID:", "should be a long");
             String guess = io.readString("Enter your guess sequence:");
-            service.createMove(loggedInGamer, gameId, guess);
-            io.writeLine("Move registered. Guess again or exit.");
+            Move move = service.createMove(loggedInGamer, activeGameId, guess);
+            if (move.getBulls() == 4) {
+                io.writeLine("You won the game!!");
+                getNotFinishedGamesByUserName();
+            } else {
+                io.writeLine(String.format("You got %d bulls and %d cows!\n", move.getBulls(), move.getCows()));
+                io.writeLine("Move registered. Try to guess again.");
+            }
         }
     }
 
@@ -60,7 +77,7 @@ public class ClientImpl implements Client {
         } else {
             io.writeLine("Available Games:");
             for (Game game : games) {
-                io.writeLine(String.format("Game ID: %d, Status: %s", game.getId(), game.toString()));
+                io.writeLine(String.format("Game ID: %d, Is finished: %s", game.getId(), game.isFinished()));
             }
         }
     }

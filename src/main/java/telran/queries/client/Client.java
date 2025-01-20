@@ -2,7 +2,7 @@ package telran.queries.client;
 
 public interface Client {
 
-    void startGame();
+    void createGame();
 
     void createGamer();
 

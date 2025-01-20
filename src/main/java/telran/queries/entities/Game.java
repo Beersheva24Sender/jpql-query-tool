@@ -2,37 +2,35 @@
 package telran.queries.entities;
 
 import java.time.LocalDateTime;
+import java.security.SecureRandom;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "game")
 public class Game {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
-    @Column(name = "date_time")
-    public LocalDateTime dateTime;
-    @Column(name = "is_finished")
-    public boolean isFinished;
+    private long id;
 
-    String sequence;
+    @Column(name = "date_time")
+    private LocalDateTime dateTime;
+
+    @Column(name = "is_finished")
+    private boolean isFinished;
+
+    @Column(name = "sequence")
+    private String sequence;
 
     public Game() {
-    }
-
-    public Game(String sequence) {
-        this.sequence = sequence;
+        this.dateTime = LocalDateTime.now();
         this.isFinished = false;
+        this.sequence =  generateSequence();
     }
 
     public void setGameIsFinished() {
         isFinished = true;
-    }
-
-    @Override
-    public String toString() {
-        return "Game [id=" + id + ", dateTime=" + dateTime + ", isFinished=" + isFinished + ", sequence=" + sequence
-                + "]";
     }
 
     public long getId() {
@@ -43,4 +41,26 @@ public class Game {
         return sequence;
     }
 
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished(boolean isFinished) {
+        this.isFinished = isFinished;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public String generateSequence() {
+        SecureRandom secureRandom = new SecureRandom();
+        return sequence = String.format("%04d", secureRandom.nextInt(9000) + 1000);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Game [id=%d, dateTime=%s, isFinished=%b, sequence=%s]", id, dateTime, isFinished,
+                sequence);
+    }
 }

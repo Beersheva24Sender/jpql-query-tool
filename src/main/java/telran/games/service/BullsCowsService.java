@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BullsCowsService {
 
-    Game startGame(long gameId, Gamer gamer);
+    Game createGame(Gamer gamer);
 
     void createGamer(String username, LocalDate birthdate);
 
@@ -15,7 +15,7 @@ public interface BullsCowsService {
 
     void joinGame(long gameId, Gamer gamer);
 
-    void createMove(Gamer gamer, long gameId, String sequence);
+    Move createMove(Gamer gamer, long gameId, String sequence);
 
     List<Game> getNotFinishedGamesByGamer(Gamer gamer);
 

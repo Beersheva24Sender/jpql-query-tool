@@ -58,7 +58,7 @@ public class Main {
 
     private static Item[] getAvailableGamesMenuItems() {
         return new Item[] {
-            Item.of("Start a New Game", io -> client.startGame()),
+            Item.of("Create a New Game", io -> client.createGame()),
             Item.of("Join an Existing Game", io -> playGameMenu()),
             Item.ofExit()
         };

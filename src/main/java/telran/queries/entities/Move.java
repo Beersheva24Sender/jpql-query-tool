@@ -29,7 +29,7 @@ public class Move {
     @Override
     public String toString() {
         return "Move [id=" + id + ", bulls=" + bulls + ", cows=" + cows + ", sequence=" + sequence + ", gameGamer="
-                + gameGamer.id + "]";
+                + gameGamer.getId() + "]";
     }
 
     public void setGameGamer(GameGamer gameGamer2) {
@@ -41,25 +41,12 @@ public class Move {
 
     private void setBullsAndCows() {
         String gameSequence = gameGamer.getGame().getSequence();
-
-        if (gameSequence.length() != sequence.length()) {
-            throw new IllegalArgumentException("Guess and target sequence must have the same length");
-        }
-
-        int[] gameSequenceCount = new int[10];
-        int[] guessSequenceCount = new int[10];
-
-        for (int i = 0; i < sequence.length(); i++) {
+        for (int i = 0; i < 4; i++) {
             if (gameSequence.charAt(i) == sequence.charAt(i)) {
                 bulls++;
-            } else {
-                gameSequenceCount[gameSequence.charAt(i) - '0']++;
-                guessSequenceCount[sequence.charAt(i) - '0']++;
+            } else if (gameSequence.contains(String.valueOf(sequence.charAt(i)))) {
+                cows++;
             }
-        }
-
-        for (int i = 0; i < 10; i++) {
-            cows += Math.min(gameSequenceCount[i], guessSequenceCount[i]);
         }
     }
 
@@ -68,6 +55,14 @@ public class Move {
             gameGamer.setWinnerGame();
             gameGamer.getGame().setGameIsFinished();
         }
+    }
+
+    public int getBulls() {
+        return bulls;
+    }
+
+    public int getCows() {
+        return cows;
     }
 
 }

@@ -14,8 +14,8 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     }
 
     @Override
-    public Game startGame(long gameId, Gamer gamer) {
-        return repository.startGame(gameId);
+    public Game createGame(Gamer gamer) {
+        return repository.createGame(gamer);
     }
 
     @Override
@@ -35,9 +35,8 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     }
 
     @Override
-    public void createMove(Gamer gamer, long gameId, String sequence) {
-        GameGamer gameGamer = repository.getGameGamerByUserAndGame(gamer.getUsername(), gameId);
-        repository.createMove(gameGamer, sequence);
+    public Move createMove(Gamer gamer, long gameId, String sequence) {
+        return repository.createMove(gamer, gameId, sequence);
     }
 
     @Override
